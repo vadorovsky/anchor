@@ -12,9 +12,33 @@ env:
   CROSS_VERSION: 0.2.5
 
 jobs:
-  release-linux:
-    name: Release (Linux)
-    runs-on: ubuntu-latest
+  build-and-publish:
+    name: Release for ${{ matrix.os }}${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            cross: true
+            artifact_name: light-anchor
+            target: x86_64-unknown-linux-musl
+            asset_name: light-anchor-linux-amd64
+          - os: ubuntu-latest
+            cross: true
+            artifact_name: light-anchor
+            target: aarch64-unknown-linux-musl
+            asset_name: light-anchor-linux-arm64
+          - os: macos-latest
+            cross: false
+            artifact_name: light-anchor
+            target: x86_64-apple-darwin
+            asset_name: light-anchor-macos-amd64
+          - os: macos-latest
+            cross: false
+            artiface_name: light-anchor
+            target: aarch64-apple-darwin
+            asset_name: light-anchor-macos-arm64
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -34,19 +58,20 @@ jobs:
           name: "cross"
           version: "${{ env.CROSS_VERSION }}"
 
-      - name: Build (Linux amd64)
+      - name: Build
+        if: matrix.cross == true
         run: |
-          cargo clean
-          cross build --release --target x86_64-unknown-linux-musl
-          cp target/x86_64-unknown-linux-musl/release/light-anchor \
-            light-anchor-linux-amd64
+          cross build --verbose --release --target ${{ matrix.target }}
+          cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} \
+            ${{ matrix.asset_name }}
 
-      - name: Build (Linux arm64)
+      - name: Build
+        if: matrix.cross == false
         run: |
-          cargo clean
-          cross build --release --target aarch64-unknown-linux-musl
-          cp target/aarch64-unknown-linux-musl/release/light-anchor \
-            light-anchor-linux-arm64
+          rustup target add ${{ matrix.target }}
+          cargo build --verbose --release --target ${{ matrix.target }}
+          cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} \
+            ${{ matrix.asset_name }}
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -54,45 +79,4 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN }}
           files: |
-            light-anchor-linux-amd64
-            light-anchor-linux-arm64
-
-  release-macos:
-    name: Release (macOS)
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - uses: Swatinem/rust-cache@v1
-
-      - name: Install Rust aarch64-apple-darwin target
-        run: |
-          rustup target add aarch64-apple-darwin
-
-      - name: Build (macOS amd64)
-        run: |
-          cargo build --release --target x86_64-apple-darwin
-          cp target/x86_64-apple-darwin/release/light-anchor \
-            light-anchor-macos-amd64
-
-      - name: Build (macOS arm64)
-        run: |
-          cargo build --release --target aarch64-apple-darwin
-          cp target/aarch64-apple-darwin/release/light-anchor \
-            light-anchor-macos-arm64
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          token: ${{ secrets.PAT_TOKEN }}
-          files: |
-            light-anchor-macos-amd64
-            light-anchor-macos-arm64
+            ${{ matrix.asset_name }}
