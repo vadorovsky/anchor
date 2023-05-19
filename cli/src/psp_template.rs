@@ -64,6 +64,7 @@ codegen-units = 1
 
 [patch.crates-io]
 solana-program = { git = "https://github.com/Lightprotocol/solana", branch="v1.15" }
+solana-zk-token-sdk = { git = "https://github.com/Lightprotocol/solana", branch="v1.15" }
 winnow = { git = "https://github.com/winnow-rs/winnow", tag="v0.4.1" }
 "#
 }
@@ -116,10 +117,10 @@ default = []
 [dependencies]
 anchor-lang = "0.26.0"
 anchor-spl = "0.26.0"
-merkle_tree_program = {{ git="https://github.com/lightprotocol/light-protocol", features = ["cpi"], rev="c8eabcc2ac56d6daa27bf7aca9ec5fa93447a3d5"}}
-verifier_program_two = {{ git="https://github.com/lightprotocol/light-protocol", features = ["cpi"], rev="c8eabcc2ac56d6daa27bf7aca9ec5fa93447a3d5"}}
+merkle_tree_program = {{ git = "https://github.com/lightprotocol/light-protocol", features = ["cpi"], rev = "0bf58c50e0c4ae17ef5b63fa739a5910191f5d85" }}
+verifier_program_two = {{ git = "https://github.com/lightprotocol/light-protocol", features = ["cpi"], rev = "0bf58c50e0c4ae17ef5b63fa739a5910191f5d85" }}
 light-macros = "0.1.0"
-light-verifier-sdk = {{ git="https://github.com/lightprotocol/light-protocol", rev="c8eabcc2ac56d6daa27bf7aca9ec5fa93447a3d5"}}
+light-verifier-sdk = {{ git = "https://github.com/lightprotocol/light-protocol", rev = "0bf58c50e0c4ae17ef5b63fa739a5910191f5d85" }}
 solana-program = "1.15.2"
 groth16-solana = "0.0.1"
 "#,
@@ -609,8 +610,6 @@ pub fn ts_package_json_psp(jest: bool, name: &str) -> String {
 pub fn ts_mocha_psp(name: &str) -> String {
     format!(
         r#"import * as anchor from "@coral-xyz/anchor";
-
-import * as anchor from "@coral-xyz/anchor";
 import {{assert}} from "chai";
 import {{
     Utxo,
@@ -885,7 +884,7 @@ include "../node_modules/circomlib/circuits/comparators.circom";
 // will create a new instance of the circuit
 #[instance]
 {{
-    fileName: {}_main,
+    fileName: {},
     config(),
     nrAppUtoxs: 1,
     publicInputs: [currentSlot]
