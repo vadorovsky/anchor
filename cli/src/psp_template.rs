@@ -579,8 +579,8 @@ pub fn ts_package_json_psp(jest: bool, name: &str) -> String {
     "scripts": {{
         "lint:fix": "prettier */*.js \"*/**/*{{.js,.ts}}\" -w",
         "lint": "prettier */*.js \"*/**/*{{.js,.ts}}\" --check",
-        "test": "light test --projectName {0} --programAddress {1}",
-        "build": "light build --name {0}"
+        "test": "light test --testCommand {0} --programName {1} --programAddress {2}",
+        "build": "light build --name {1}"
     }},
     "dependencies": {{
         "@coral-xyz/anchor": "^{VERSION}",
@@ -601,6 +601,7 @@ pub fn ts_package_json_psp(jest: bool, name: &str) -> String {
 }}
 "#,
             name,
+            name.to_snake_case(),
             default_program_id()
         )
     }
